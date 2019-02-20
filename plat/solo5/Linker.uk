@@ -1,0 +1,43 @@
+ifeq (x86_64,$(UK_ARCH))
+SOLO5_LDSCRIPT  := $(UK_BASE)/plat/solo5/x86/link64.ld
+SOLO5_LDFLAGS-y += -m elf_x86_64
+endif
+
+##
+## Link image
+##
+SOLO5_IMAGE := $(BUILD_DIR)/$(UK_NAME)_solo5-$(UK_ARCH)
+SOLO5_HVT := $(BUILD_DIR)/solo5_hvt.o
+
+$(SOLO5_IMAGE): $(SOLO5_LINK) $(SOLO5_LINK-y) $(UK_LINK) $(UK_LINK-y)
+	$(call build_cmd,LD,,$@.o,\
+	       $(LD) $(LIBLDFLAGS) $(LIBLDFLAGS-y) $(SOLO5_LDFLAGS) $(SOLO5_LDFLAGS-y) $^ -o $@.o)
+ifeq (x86_64,$(UK_ARCH))
+	$(call build_cmd,LD,,$@,\
+	       $(LD) $(LDFLAGS) $(LDFLAGS-y) $(SOLO5_LDFLAGS) $(SOLO5_LDFLAGS-y) -T $(SOLO5_LDSCRIPT) $@.o $(SOLO5_HVT) -o $@)
+ifeq ($(OPTIMIZE_DBGFILE),y)
+	$(call build_cmd,OBJCOPY,,$@.dbg,\
+	       $(OBJCOPY) --only-keep-debug $@ $@.dbg)
+endif
+ifeq ($(OPTIMIZE_SYMFILE),y)
+	$(call build_cmd,NM,,$@.sym,\
+	       $(NM) -n $@ > $@.sym)
+endif
+ifeq ($(OPTIMIZE_STRIP),y)
+	$(call verbose_cmd,STRIP,$(notdir $@),\
+	       $(STRIP) -s $@)
+endif
+	$(call build_cmd,GZ,,$@.gz,\
+	       $(GZIP) -f -9 -c $@ >$@.gz)
+endif
+
+# register image to the build
+UK_IMAGES-$(PLAT_SOLO5) += $(SOLO5_IMAGE)
+
+# ...for cleaning:
+LIBSOLO5PLAT_CLEAN += $(call build_clean,$(SOLO5_IMAGE))
+LIBSOLO5PLAT_CLEAN += $(call build_clean,$(SOLO5_IMAGE).gz)
+LIBSOLO5PLAT_CLEAN += $(call build_clean,$(SOLO5_IMAGE).dbg)
+LIBSOLO5PLAT_CLEAN += $(call build_clean,$(SOLO5_IMAGE).sym)
+LIBSOLO5PLAT_CLEAN += $(call build_clean,$(SOLO5_IMAGE).o)
+# LIBSOLO5PLAT_CLEAN += $(call build_clean,$(SOLO5_IMAGE).ld.o)

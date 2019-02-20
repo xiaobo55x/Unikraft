@@ -1,0 +1,22 @@
+##
+## SOLO5 platform registration
+##
+$(eval $(call addplat_s,solo5,$(PLAT_SOLO5)))
+
+##
+## SOLO5 platform library registration
+##
+$(eval $(call addplatlib,solo5,libsolo5plat))
+
+##
+## Platform library definitions
+##
+LIBSOLO5PLAT_ASINCLUDES-y        += -I$(LIBSOLO5PLAT_BASE)/include
+LIBSOLO5PLAT_CINCLUDES-y         += -I$(LIBSOLO5PLAT_BASE)/include
+
+LIBSOLO5PLAT_SRCS-$(ARCH_X86_64) += $(LIBSOLO5PLAT_BASE)/x86/setup.c
+LIBSOLO5PLAT_SRCS-$(ARCH_X86_64) += $(LIBSOLO5PLAT_BASE)/x86/console.c
+LIBSOLO5PLAT_SRCS-$(ARCH_X86_64) += $(LIBSOLO5PLAT_BASE)/x86/lcpu.c
+LIBSOLO5PLAT_SRCS-$(ARCH_X86_64) += $(LIBSOLO5PLAT_BASE)/x86/time.c
+LIBSOLO5PLAT_SRCS-y              += $(LIBSOLO5PLAT_BASE)/shutdown.c
+LIBSOLO5PLAT_SRCS-y              += $(LIBSOLO5PLAT_BASE)/memory.c
